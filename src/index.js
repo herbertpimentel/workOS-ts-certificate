@@ -2,12 +2,18 @@ require('url-search-params-polyfill');
 
 const fs = require('fs');
 const path = require('path');
-
 const express = require('express');
-
 const { WorkOS } = require('@workos-inc/node');
+const { Agent } = require('https');
 
-const workos = new WorkOS(process.env.WORKOS_API_KEY);
+const agent = new Agent({
+  ca: fs.readFileSync(path.join(__dirname, '..', 'certs',  './isrgrootx1.pem')),
+});
+
+const workos = new WorkOS(process.env.WORKOS_API_KEY, {
+  httpsAgent: agent
+});
+
 const clientID = process.env.WORKOS_CLIENT_ID;
 
 const app = express();
@@ -52,7 +58,5 @@ app.get('/cert', async (req, res) => {
     const certPath = path.resolve(process.env.NODE_EXTRA_CA_CERTS + '.pem');
     res.send(fs.readFileSync(certPath));
 });
-
-
 
 app.listen(3000, () => console.log('it is running...'));
